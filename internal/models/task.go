@@ -3,11 +3,22 @@ package models
 import "time"
 
 type Task struct {
-	Title       string
-	Description string
-	Completed   bool
-	CreatedAt   time.Time
-	CompletedAt *time.Time
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	Completed   bool       `json:"completed"`
+	CreatedAt   time.Time  `json:"created_at"`
+	CompletedAt *time.Time `json:"completed_at"`
+}
+
+type TaskDTO struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+type UpdateTaskDTO struct {
+	Title       *string `json:"title"`
+	Description *string `json:"description"`
+	Completed   *bool   `json:"completed"`
 }
 
 func NewTask(title, description string) Task {
