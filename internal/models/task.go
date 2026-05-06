@@ -12,14 +12,14 @@ type Task struct {
 }
 
 type TaskDTO struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Title       string `json:"title" db:"title"`
+	Description string `json:"description" db:"description"`
 }
 
 type UpdateTaskDTO struct {
-	Title       *string `json:"title"`
-	Description *string `json:"description"`
-	Completed   *bool   `json:"completed"`
+	Title       *string `json:"title" db:"title"`
+	Description *string `json:"description" db:"description"`
+	Completed   *bool   `json:"completed" db:"completed"`
 }
 
 func NewTask(title, description string) Task {

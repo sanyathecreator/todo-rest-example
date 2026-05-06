@@ -60,9 +60,9 @@ func (h *Handlers) CreateTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	task := models.NewTask(dto.Title, dto.Description)
-	h.repo.AddTask(task)
+	h.repo.AddTask(task) // TODO: if title already exists, error is dropped, no response
 
-	respondWithJSON(w, http.StatusOK, task)
+	respondWithJSON(w, http.StatusCreated, task)
 }
 
 func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
@@ -70,6 +70,7 @@ func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 	_, err := h.repo.GetTask(title)
 	if err != nil {
+		// TODO: Go convention is lowercase error strings
 		respondWithError(w, http.StatusNotFound, "Task does not exist")
 		return
 	}
@@ -117,7 +118,7 @@ func (h *Handlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{"message": "succes"})
+	respondWithJSON(w, http.StatusOK, map[string]string{"message": "success"})
 }
 
 func parsePath(r *http.Request) string {

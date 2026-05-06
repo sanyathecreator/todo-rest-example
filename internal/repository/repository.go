@@ -25,10 +25,11 @@ func (r *Repository) AddTask(task models.Task) error {
 	return nil
 }
 
+// BUG: if client sends no "title" field, this panics if _, ok := r.tasks[*dto.Title]; !ok {
 func (r *Repository) UpdateTask(dto models.UpdateTaskDTO) (models.Task, error) {
-	if _, ok := r.tasks[*dto.Title]; !ok {
-		return models.Task{}, errors.New("Task not found")
-	}
+	//if _, ok := r.tasks[*dto.Title]; !ok {
+	//	return models.Task{}, errors.New("Task not found")
+	//}
 
 	task := r.tasks[*dto.Title]
 
@@ -44,7 +45,7 @@ func (r *Repository) UpdateTask(dto models.UpdateTaskDTO) (models.Task, error) {
 		}
 	}
 
-	r.tasks[*dto.Title] = task
+	r.tasks[task.Title] = task
 
 	return task, nil
 }
