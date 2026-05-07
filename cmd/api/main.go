@@ -13,13 +13,13 @@ import (
 )
 
 // TODOs:
-// - move DB connection code to database file
-// - rewrite all repository function for using DB with SQL queries
-// - create DB table
-// - wire conn into repository.New()
+// + move DB connection code to database file
+// + rewrite all repository function for using DB with SQL queries
+// + create DB table
+// + wire conn into repository.New()
 // - add queries in handlers for filtering(completed/uncompleted tasks)
 
-// - Fix the ToggleCompletion bug in task.go:39 —
+// + Fix the ToggleCompletion bug in task.go:39 —
 // 		*t.CompletedAt panics because the pointer is nil, you need to create a new
 
 var port = "8080"
@@ -44,8 +44,7 @@ func main() {
 		panic(err)
 	}
 
-	repo := repository.New() // FIX: still passes nothing, so the repo still uses the in-memory map
-
+	repo := repository.New(conn)
 	log.Println("Registering handlers")
 
 	router := router.Register(repo)

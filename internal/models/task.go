@@ -8,7 +8,7 @@ type Task struct {
 	Description string     `json:"description" db:"description"`
 	Completed   bool       `json:"completed" db:"completed"`
 	CreatedAt   time.Time  `json:"created_at" db:"created_at"`
-	CompletedAt *time.Time `json:"completed_at" db:"updated_at"`
+	CompletedAt *time.Time `json:"completed_at" db:"completed_at"`
 }
 
 type TaskDTO struct {
@@ -32,10 +32,10 @@ func NewTask(title, description string) Task {
 	}
 }
 
-// BUG: panics when CompletedAt is nil (which it always is for a new task) *t.CompletedAt = time.Now()
 func (t *Task) ToggleCompletion() {
 	if !t.Completed {
-		*t.CompletedAt = time.Now()
+		now := time.Now()
+		t.CompletedAt = &now
 	} else {
 		t.CompletedAt = nil
 	}

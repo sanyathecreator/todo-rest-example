@@ -1,37 +1,49 @@
 package repository
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"sanyathecreator/todo-rest-example/internal/models"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type Repository struct {
-	tasks map[string]models.Task
+	conn *pgx.Conn
 }
 
-func New() *Repository {
+func New(conn *pgx.Conn) *Repository {
 	return &Repository{
-		tasks: make(map[string]models.Task),
+		conn: conn,
 	}
 }
 
-func (r *Repository) AddTask(task models.Task) error {
-	if _, ok := r.tasks[task.Title]; ok {
-		return errors.New("Task already exists")
+func (r *Repository) AddTask(ctx context.Context, dto models.TaskDTO) (models.Task, error) {
+	var task models.Task
+
+	query := `
+        INSERT INTO tasks (title, description)
+        VALUES ($1, $2)
+        RETURNING id, title, description, completed, created_at, completed_at
+    `
+
+	err := r.conn.QueryRow(ctx, query, dto.Title, dto.Description).Scan(
+		&task.ID, &task.Title, &task.Description,
+		&task.Completed, &task.CreatedAt, &task.CompletedAt,
+	)
+	if err != nil {
+		return models.Task{}, err
 	}
 
-	r.tasks[task.Title] = task
-
-	return nil
+	return task, nil
 }
 
-// BUG: if client sends no "title" field, this panics if _, ok := r.tasks[*dto.Title]; !ok {
-func (r *Repository) UpdateTask(dto models.UpdateTaskDTO) (models.Task, error) {
-	//if _, ok := r.tasks[*dto.Title]; !ok {
-	//	return models.Task{}, errors.New("Task not found")
-	//}
-
-	task := r.tasks[*dto.Title]
+func (r *Repository) UpdateTask(ctx context.Context, id int, dto models.UpdateTaskDTO) (models.Task, error) {
+	task, err := r.GetTask(ctx, id)
+	if err != nil {
+		return models.Task{}, err
+	}
 
 	if dto.Title != nil {
 		task.Title = *dto.Title
@@ -45,37 +57,91 @@ func (r *Repository) UpdateTask(dto models.UpdateTaskDTO) (models.Task, error) {
 		}
 	}
 
-	r.tasks[task.Title] = task
+	query := `
+    UPDATE tasks 
+    SET title=$1, description=$2, completed=$3, completed_at=$4
+    WHERE id=$5
+	`
 
-	return task, nil
-}
-
-func (r *Repository) GetTask(title string) (models.Task, error) {
-	task, ok := r.tasks[title]
-	if !ok {
-		return models.Task{}, errors.New("Task not found")
+	_, err = r.conn.Exec(ctx, query,
+		task.Title, task.Description, task.Completed, task.CompletedAt, id,
+	)
+	if err != nil {
+		return models.Task{}, err
 	}
 
 	return task, nil
 }
 
-func (r *Repository) GetAllTasks() map[string]models.Task {
-	tmp := make(map[string]models.Task, len(r.tasks))
+func (r *Repository) GetTask(ctx context.Context, id int) (models.Task, error) {
+	var task models.Task
 
-	for k, v := range r.tasks {
-		tmp[k] = v
+	query := `
+	SELECT id, title, description, completed, created_at, completed_at 
+	FROM tasks 
+	where id = $1;
+	`
+
+	err := r.conn.QueryRow(ctx, query, id).Scan(
+		&task.ID, &task.Title, &task.Description,
+		&task.Completed, &task.CreatedAt, &task.CompletedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return models.Task{}, fmt.Errorf("task with id %d not found", id)
+		}
+		return models.Task{}, err
 	}
 
-	return tmp
+	return task, nil
 }
 
-func (r *Repository) DeleteTask(title string) error {
-	_, ok := r.tasks[title]
-	if !ok {
-		return errors.New("Task not found")
+func (r *Repository) GetAllTasks(ctx context.Context) ([]models.Task, error) {
+	query := `
+	SELECT id, title, description, completed, created_at, completed_at 
+	FROM tasks 
+	order by created_at desc;
+	`
+
+	rows, err := r.conn.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks []models.Task
+	for rows.Next() {
+		var task models.Task
+		if err := rows.Scan(
+			&task.ID, &task.Title, &task.Description,
+			&task.Completed, &task.CreatedAt, &task.CompletedAt,
+		); err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
 	}
 
-	delete(r.tasks, title)
+	// check mid-iteration errors
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
+
+func (r *Repository) DeleteTask(ctx context.Context, id int) error {
+	query := `DELETE FROM tasks WHERE id = $1`
+
+	result, err := r.conn.Exec(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	rows := result.RowsAffected()
+
+	if rows == 0 {
+		return fmt.Errorf("task with id %d not found", id)
+	}
 
 	return nil
 }
