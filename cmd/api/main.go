@@ -12,6 +12,16 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// TODOs:
+// - move DB connection code to database file
+// - rewrite all repository function for using DB with SQL queries
+// - create DB table
+// - wire conn into repository.New()
+// - add queries in handlers for filtering(completed/uncompleted tasks)
+
+// - Fix the ToggleCompletion bug in task.go:39 —
+// 		*t.CompletedAt panics because the pointer is nil, you need to create a new
+
 var port = "8080"
 
 func main() {
@@ -25,7 +35,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	conn, err := repository.Connect(ctx, dbURL)
+	conn, err := repository.InitDB(ctx, dbURL)
 	if err != nil {
 		panic(err)
 	}
@@ -34,7 +44,7 @@ func main() {
 		panic(err)
 	}
 
-	repo := repository.New()
+	repo := repository.New() // FIX: still passes nothing, so the repo still uses the in-memory map
 
 	log.Println("Registering handlers")
 
