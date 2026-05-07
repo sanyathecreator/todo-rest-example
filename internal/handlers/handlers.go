@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sanyathecreator/todo-rest-example/internal/models"
 	"sanyathecreator/todo-rest-example/internal/repository"
+	"strconv"
 	"strings"
 )
 
@@ -29,15 +31,23 @@ func respondWithError(w http.ResponseWriter, statusCode int, message string) {
 }
 
 func (h *Handlers) GetAllTasks(w http.ResponseWriter, r *http.Request) {
-	tasks := h.repo.GetAllTasks()
+	tasks, err := h.repo.GetAllTasks(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	respondWithJSON(w, http.StatusOK, tasks)
 }
 
 func (h *Handlers) GetTask(w http.ResponseWriter, r *http.Request) {
-	title := parsePath(r)
+	id, err := parsePath(r)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "wrong ID provided")
+		return
+	}
 
-	task, err := h.repo.GetTask(title)
+	task, err := h.repo.GetTask(r.Context(), id)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "Task does not exist")
 		return
@@ -59,16 +69,22 @@ func (h *Handlers) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task := models.NewTask(dto.Title, dto.Description)
-	h.repo.AddTask(task) // TODO: if title already exists, error is dropped, no response
-
+	task, err := h.repo.AddTask(r.Context(), dto)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 	respondWithJSON(w, http.StatusCreated, task)
 }
 
 func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
-	title := parsePath(r)
+	id, err := parsePath(r)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "wrong ID provided")
+		return
+	}
 
-	_, err := h.repo.GetTask(title)
+	_, err = h.repo.GetTask(r.Context(), id)
 	if err != nil {
 		// TODO: Go convention is lowercase error strings
 		respondWithError(w, http.StatusNotFound, "Task does not exist")
@@ -86,9 +102,9 @@ func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, err := h.repo.UpdateTask(dto)
+	task, err := h.repo.UpdateTask(r.Context(), id, dto)
 	if err != nil {
-		if strings.Contains(err.Error(), "Task not found") {
+		if strings.Contains(err.Error(), fmt.Sprintf("task with id %d not found", id)) {
 			respondWithError(w, http.StatusNotFound, err.Error())
 		} else {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -100,17 +116,21 @@ func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
-	title := parsePath(r)
-
-	_, err := h.repo.GetTask(title)
+	id, err := parsePath(r)
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "Task does not exist")
+		respondWithError(w, http.StatusBadRequest, "wrong ID provided")
 		return
 	}
 
-	err = h.repo.DeleteTask(title)
+	_, err = h.repo.GetTask(r.Context(), id)
 	if err != nil {
-		if strings.Contains(err.Error(), "Task not found") {
+		respondWithError(w, http.StatusNotFound, fmt.Sprintf("task with id %d not found", id))
+		return
+	}
+
+	err = h.repo.DeleteTask(r.Context(), id)
+	if err != nil {
+		if strings.Contains(err.Error(), fmt.Sprintf("task with id %d not found", id)) {
 			respondWithError(w, http.StatusNotFound, err.Error())
 		} else {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -121,9 +141,12 @@ func (h *Handlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, map[string]string{"message": "success"})
 }
 
-func parsePath(r *http.Request) string {
+func parsePath(r *http.Request) (int, error) {
 	pathParts := strings.Split(strings.TrimPrefix(r.URL.Path, "/tasks/"), "/")
-	title := pathParts[0]
-
-	return title
+	idStr := pathParts[0]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
