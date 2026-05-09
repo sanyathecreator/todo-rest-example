@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sanyathecreator/todo-rest-example/internal/middleware"
 	"sanyathecreator/todo-rest-example/internal/repository"
 	"sanyathecreator/todo-rest-example/internal/router"
 
@@ -48,10 +49,11 @@ func main() {
 	log.Println("Registering handlers")
 
 	router := router.Register(repo)
+	handler := middleware.Logger(router)
 
 	log.Printf("Running server on port %s", port)
 
-	err = http.ListenAndServe(fmt.Sprintf(":%s", port), router)
+	err = http.ListenAndServe(fmt.Sprintf(":%s", port), handler)
 	if err != nil {
 		log.Fatal(err)
 	}
