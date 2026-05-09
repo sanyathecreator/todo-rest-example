@@ -13,14 +13,14 @@ import (
 )
 
 // TODOs:
-// + move DB connection code to database file
-// + rewrite all repository function for using DB with SQL queries
-// + create DB table
-// + wire conn into repository.New()
 // - add queries in handlers for filtering(completed/uncompleted tasks)
+// - add mutexes
 
-// + Fix the ToggleCompletion bug in task.go:39 —
-// 		*t.CompletedAt panics because the pointer is nil, you need to create a new
+// - middleware - request logging(method, path, status code, latency)
+// - Graceful shutdown - Handle SIGTERM/SIGINT, drain in-flight requests, close the DB connection cleanly
+// - Sentinel errors - Define ErrNotFound, use errors.Is() in handlers
+// - Tests — integration tests against a real test DB
+// - Docker Compose — package the app + postgres together
 
 var port = "8080"
 

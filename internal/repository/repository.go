@@ -96,14 +96,25 @@ func (r *Repository) GetTask(ctx context.Context, id int) (models.Task, error) {
 	return task, nil
 }
 
-func (r *Repository) GetAllTasks(ctx context.Context) ([]models.Task, error) {
+func (r *Repository) GetAllTasks(ctx context.Context, completed *bool) ([]models.Task, error) {
 	query := `
 	SELECT id, title, description, completed, created_at, completed_at 
-	FROM tasks 
-	order by created_at desc;
+	FROM tasks
 	`
 
-	rows, err := r.conn.Query(ctx, query)
+	args := []any{}
+
+	if completed != nil {
+		query += `
+		WHERE completed = $1
+		order by created_at desc;
+		`
+		args = append(args, *completed)
+	} else {
+		query += " order by created_at desc;"
+	}
+
+	rows, err := r.conn.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

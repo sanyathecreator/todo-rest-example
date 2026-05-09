@@ -31,7 +31,20 @@ func respondWithError(w http.ResponseWriter, statusCode int, message string) {
 }
 
 func (h *Handlers) GetAllTasks(w http.ResponseWriter, r *http.Request) {
-	tasks, err := h.repo.GetAllTasks(r.Context())
+	var completed *bool
+
+	// check if filtering is provided
+	if raw := r.URL.Query().Get("completed"); raw != "" {
+		val, err := strconv.ParseBool(raw)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "completed must be true or false")
+			return
+		}
+
+		completed = &val
+	}
+
+	tasks, err := h.repo.GetAllTasks(r.Context(), completed)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -49,7 +62,7 @@ func (h *Handlers) GetTask(w http.ResponseWriter, r *http.Request) {
 
 	task, err := h.repo.GetTask(r.Context(), id)
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "Task does not exist")
+		respondWithError(w, http.StatusNotFound, "task does not exist")
 		return
 	}
 
@@ -60,12 +73,12 @@ func (h *Handlers) CreateTask(w http.ResponseWriter, r *http.Request) {
 	var dto models.TaskDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Set incorrect data")
+		respondWithError(w, http.StatusBadRequest, "set incorrect data")
 		return
 	}
 
 	if strings.TrimSpace(dto.Title) == "" {
-		respondWithError(w, http.StatusBadRequest, "Title cannot be null")
+		respondWithError(w, http.StatusBadRequest, "title cannot be null")
 		return
 	}
 
@@ -86,19 +99,18 @@ func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 	_, err = h.repo.GetTask(r.Context(), id)
 	if err != nil {
-		// TODO: Go convention is lowercase error strings
-		respondWithError(w, http.StatusNotFound, "Task does not exist")
+		respondWithError(w, http.StatusNotFound, "task does not exist")
 		return
 	}
 
 	var dto models.UpdateTaskDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Set incorrect data")
+		respondWithError(w, http.StatusBadRequest, "set incorrect data")
 		return
 	}
 
 	if dto.Title != nil && strings.TrimSpace(*dto.Title) == "" {
-		respondWithError(w, http.StatusBadRequest, "Title cannot be null")
+		respondWithError(w, http.StatusBadRequest, "title cannot be null")
 		return
 	}
 
