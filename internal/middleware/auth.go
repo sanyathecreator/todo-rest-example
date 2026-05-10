@@ -30,7 +30,7 @@ func Auth(next http.Handler) http.Handler {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method")
 			}
-			return []byte("your-secret-key"), nil
+			return []byte("verysecret"), nil
 		})
 		if err != nil || !token.Valid {
 			http.Error(w, `{"error":"invalid token"}`, http.StatusUnauthorized)
