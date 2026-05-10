@@ -14,12 +14,9 @@ import (
 )
 
 // TODOs:
-// - add queries in handlers for filtering(completed/uncompleted tasks)
 // - add mutexes
 
-// - middleware - request logging(method, path, status code, latency)
 // - Graceful shutdown - Handle SIGTERM/SIGINT, drain in-flight requests, close the DB connection cleanly
-// - Sentinel errors - Define ErrNotFound, use errors.Is() in handlers
 // - Tests — integration tests against a real test DB
 // - Docker Compose — package the app + postgres together
 

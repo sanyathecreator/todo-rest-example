@@ -12,7 +12,7 @@ func InitDB(ctx context.Context, databaseURL string) (*pgx.Conn, error) {
 		return nil, err
 	}
 
-	err = CreateTable(ctx, conn)
+	err = CreateTables(ctx, conn)
 	if err != nil {
 		return nil, err
 	}
@@ -29,10 +29,24 @@ func Connect(ctx context.Context, databaseURL string) (*pgx.Conn, error) {
 	return conn, nil
 }
 
-func CreateTable(ctx context.Context, conn *pgx.Conn) error {
+func CreateTables(ctx context.Context, conn *pgx.Conn) error {
+	createUsersTable := `
+	CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+`
+	_, err := conn.Exec(ctx, createUsersTable)
+	if err != nil {
+		return err
+	}
+
 	createTasksTable := `
 	CREATE TABLE IF NOT EXISTS tasks (
     id SERIAL PRIMARY KEY,
+	user_id INT NOT NULL REFERENCES users(id),
     title VARCHAR(255) NOT NULL,
     description TEXT,
     completed BOOLEAN DEFAULT FALSE,
@@ -40,7 +54,7 @@ func CreateTable(ctx context.Context, conn *pgx.Conn) error {
     completed_at TIMESTAMP DEFAULT NULL
 );
 	`
-	_, err := conn.Exec(ctx, createTasksTable)
+	_, err = conn.Exec(ctx, createTasksTable)
 	if err != nil {
 		return err
 	}
