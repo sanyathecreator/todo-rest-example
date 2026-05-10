@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	"sanyathecreator/todo-rest-example/internal/handlers"
+	"sanyathecreator/todo-rest-example/internal/middleware"
 	"sanyathecreator/todo-rest-example/internal/repository"
 )
 
@@ -10,9 +11,14 @@ func Register(repo *repository.Repository) http.Handler {
 	httpHandlers := handlers.New(repo)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/tasks", httpHandlers.GetAllTasks)
-	mux.HandleFunc("/tasks/create", httpHandlers.CreateTask)
-	mux.HandleFunc("/tasks/", methodHandler(httpHandlers))
+	// public routes
+	mux.HandleFunc("/register", httpHandlers.RegisterUser)
+	mux.HandleFunc("/login", httpHandlers.LoginUser)
+
+	// protected routes
+	mux.Handle("/tasks", middleware.Auth(http.HandlerFunc(httpHandlers.GetAllTasks)))
+	mux.Handle("/tasks/create", middleware.Auth(http.HandlerFunc(httpHandlers.CreateTask)))
+	mux.Handle("/tasks/", middleware.Auth(methodHandler(httpHandlers)))
 
 	return mux
 }
