@@ -1,2 +1,7 @@
 .env
 PLAN.md
+FRONT.md
+
+# Go binaries
+*.exe
+backend/tmp/
