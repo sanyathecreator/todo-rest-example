@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiCall } from "../api/client";
 
 function Tasks() {
     const [tasks, setTasks] = useState(null)
@@ -13,9 +14,7 @@ function Tasks() {
             return
         }
 
-        fetch('http://localhost:8080/tasks', {
-            headers: { 'Authorization': `Bearer ${token}` },
-        })
+        apiCall()
             .then(res => {
                 if (res.status === 401) {
                     localStorage.removeItem('token')
