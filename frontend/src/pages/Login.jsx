@@ -13,11 +13,10 @@ function Login() {
         setError(null)
 
         const res = await login(email, password)
-
         const data = await res.json()
 
         if (!res.ok) {
-            setError(data.error)
+            setError(data.error || 'Login failed')
             return
         }
 
@@ -26,25 +25,30 @@ function Login() {
     }
 
     return (
-        <div>
+        <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
             <h1>Login</h1>
-            {error && <p style={{color: 'red'}}>{error}</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
             <form onSubmit={handleSubmit}>
                 <input
                     type="email"
                     placeholder="Email"
                     value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '10px', marginBottom: '10px', boxSizing: 'border-box' }}
                 />
                 <input
                     type="password"
                     placeholder="Password"
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '10px', marginBottom: '10px', boxSizing: 'border-box' }}
                 />
-                <button type="submit">Login</button>
+                <button type="submit" style={{ width: '100%', padding: '10px' }}>Login</button>
             </form>
-            <button onClick={() => navigate('/register')}>Don't have an account? Register</button>
+            <p>Don't have an account? <a href="/register">Register</a></p>
         </div>
     )
 }

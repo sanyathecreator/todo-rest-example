@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiCall } from "../api/client";
+import TaskList from "../components/TaskList";
 
 function Tasks() {
     const [tasks, setTasks] = useState(null)
@@ -36,14 +37,7 @@ function Tasks() {
     return (
         <div>
             <button onClick={handleLogout}>Logout</button>
-            <ul>
-                {tasks?.map((task) => (
-                    <li key={task.id}>
-                        <p>{task.title}</p>
-                        <p>{task.completed ? 'completed' : 'uncompleted'}</p>
-                    </li>
-                ))}
-            </ul>
+            <TaskList tasks={tasks} />
         </div>
     )
 }
