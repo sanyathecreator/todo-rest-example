@@ -30,9 +30,10 @@ func (h *Handlers) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dto.Password = hash
-
-	user, err := h.repo.AddUser(r.Context(), dto)
+	user, err := h.repo.AddUser(r.Context(), models.UserDTO{
+		Email:    strings.ToLower(dto.Email),
+		Password: hash,
+	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -49,7 +50,7 @@ func (h *Handlers) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.repo.GetUserByEmail(r.Context(), dto.Email)
+	user, err := h.repo.GetUserByEmail(r.Context(), strings.ToLower(dto.Email))
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "invalid credentials")
 		return

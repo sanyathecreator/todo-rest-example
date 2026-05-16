@@ -34,7 +34,7 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (models.U
 	query := `
 	SELECT id, email, password_hash, created_at
 	FROM users 
-	where email = $1;
+	where LOWER(email) = LOWER($1);
 	`
 
 	err := r.conn.QueryRow(ctx, query, email).Scan(
