@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../api/auth"
+import '../styles/Auth.css'
 
 function Login() {
     const [email, setEmail] = useState('')
@@ -25,30 +26,33 @@ function Login() {
     }
 
     return (
-        <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-            <h1>Login</h1>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className="auth-page">
+            <div className="auth-container">
+                <h1 className="auth-title">Login</h1>
+                {error && <div className="auth-error">{error}</div>}
 
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '10px', marginBottom: '10px', boxSizing: 'border-box' }}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '10px', marginBottom: '10px', boxSizing: 'border-box' }}
-                />
-                <button type="submit" style={{ width: '100%', padding: '10px' }}>Login</button>
-            </form>
-            <p>Don't have an account? <a href="/register">Register</a></p>
+                <form className="auth-form" onSubmit={handleSubmit}>
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    <button type="submit" className="auth-btn-submit">Login</button>
+                </form>
+
+                <div className="auth-footer">
+                    Don't have an account? <a href="/register">Register</a>
+                </div>
+            </div>
         </div>
     )
 }

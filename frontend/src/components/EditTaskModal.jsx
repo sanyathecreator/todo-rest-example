@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import '../styles/Modal.css'
 
 function EditTaskModal({ task, isOpen, onClose, onTaskUpdated }) {
     const [title, setTitle] = useState('')
@@ -31,39 +32,23 @@ function EditTaskModal({ task, isOpen, onClose, onTaskUpdated }) {
     }
 
     return (
-        <div style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-        }}>
-            <div style={{
-                backgroundColor: 'white',
-                padding: '20px',
-                borderRadius: '8px',
-                width: '90%',
-                maxWidth: '400px'
-            }}>
-                <h2>Edit Task</h2>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className="modal-overlay">
+            <div className="modal-content">
+                <h2 className="modal-header">Edit Task</h2>
+                {error && <div className="modal-error">{error}</div>}
 
-                <form onSubmit={handleSubmit}>
+                <form className="modal-form" onSubmit={handleSubmit}>
                     <input
                         type="text"
                         placeholder="Task title"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         required
-                        style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
                     />
                     <textarea
                         placeholder="Task description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
                     />
                     <label>
                         <input
@@ -74,9 +59,9 @@ function EditTaskModal({ task, isOpen, onClose, onTaskUpdated }) {
                         Mark as completed
                     </label>
 
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '15px' }}>
-                        <button type="button" onClick={onClose}>Cancel</button>
-                        <button type="submit">Update</button>
+                    <div className="modal-buttons">
+                        <button type="button" className="modal-btn-cancel" onClick={onClose}>Cancel</button>
+                        <button type="submit" className="modal-btn-primary">Update</button>
                     </div>
                 </form>
             </div>

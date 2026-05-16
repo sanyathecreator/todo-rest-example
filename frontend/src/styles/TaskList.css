@@ -1,0 +1,18 @@
+.task-list {
+  margin-top: 20px;
+}
+
+.task-list-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  background: white;
+  border-radius: 8px;
+  border: 1px dashed #ddd;
+}
+
+.task-list-loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}

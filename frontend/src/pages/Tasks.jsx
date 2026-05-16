@@ -4,6 +4,7 @@ import TaskList from "../components/TaskList";
 import { getTasks, createTask, deleteTask, updateTask } from "../api/tasks";
 import EditTaskModal from "../components/EditTaskModal";
 import NewTaskModal from "../components/NewTaskModal";
+import '../styles/Tasks.css'
 
 function Tasks() {
     const [tasks, setTasks] = useState(null)
@@ -65,14 +66,18 @@ function Tasks() {
     }
 
     const handleDeleteTask = async (taskId) => {
-        const res = await deleteTask(taskId)
+        try {
+            const res = await deleteTask(taskId)
 
-        if (!res.ok) {
-            const data = await res.json()
-            throw new Error(data.error || 'Failed to delete task')
+            if (!res.ok) {
+                const data = await res.json()
+                throw new Error(data.error || 'Failed to delete task')
+            }
+
+            setTasks(tasks.filter(t => t.id !== taskId))
+        } catch (err) {
+            setError(err.message)
         }
-
-        setTasks(tasks.filter(t => t.id !== taskId))
     }
 
     const handleToggleComplete = async (taskId) => {
@@ -86,33 +91,35 @@ function Tasks() {
     }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h1>My Tasks</h1>
-                <button onClick={handleLogout}>Logout</button>
-            </div>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className="tasks-page">
+            <div className="tasks-container">
+                <div className="tasks-header">
+                    <h1 className="tasks-title">My Tasks</h1>
+                    <button className="tasks-btn-logout" onClick={handleLogout}>Logout</button>
+                </div>
+                {error && <div className="tasks-error">{error}</div>}
 
-            <button onClick={() => setShowNewModal(true)} style={{ marginBottom: '20px' }}>
-                + Create New Task
-            </button>
-            <TaskList
-                tasks={tasks}
-                onToggleComplete={handleToggleComplete}
-                onEdit={setEditingTask}
-                onDelete={handleDeleteTask}
-            />
-            <NewTaskModal
-                isOpen={showNewModal}
-                onClose={() => setShowNewModal(false)}
-                onTaskCreated={handleCreateTask}
-            />
-            <EditTaskModal
-                task={editingTask}
-                isOpen={editingTask !== null}
-                onClose={() => setEditingTask(null)}
-                onTaskUpdated={handleUpdateTask}
-            />
+                <button className="tasks-btn-create" onClick={() => setShowNewModal(true)}>
+                    + Create New Task
+                </button>
+                <TaskList
+                    tasks={tasks}
+                    onToggleComplete={handleToggleComplete}
+                    onEdit={setEditingTask}
+                    onDelete={handleDeleteTask}
+                />
+                <NewTaskModal
+                    isOpen={showNewModal}
+                    onClose={() => setShowNewModal(false)}
+                    onTaskCreated={handleCreateTask}
+                />
+                <EditTaskModal
+                    task={editingTask}
+                    isOpen={editingTask !== null}
+                    onClose={() => setEditingTask(null)}
+                    onTaskUpdated={handleUpdateTask}
+                />
+            </div>
         </div>
     )
 }

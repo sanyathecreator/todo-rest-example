@@ -1,16 +1,17 @@
 import Task from "./Task";
+import '../styles/TaskList.css'
 
 function TaskList({ tasks, onToggleComplete, onEdit, onDelete }) {
     if (!tasks) {
-        return <p>Loading tasks...</p>
+        return <div className="task-list-loading">Loading tasks...</div>
     }
 
     if (tasks.length === 0) {
-        return <p>No tasks yet. Create one to get started!</p>
+        return <div className="task-list-empty">No tasks yet. Create one to get started!</div>
     }
 
     return (
-        <div>
+        <div className="task-list">
             {tasks.map((task) => (
                 <Task
                     key={task.id}

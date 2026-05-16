@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register } from "../api/auth";
+import '../styles/Auth.css'
 
 function Register() {
     const [email, setEmail] = useState('')
@@ -30,38 +31,40 @@ function Register() {
     }
 
     return (
-        <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-            <h1>Register</h1>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className="auth-page">
+            <div className="auth-container">
+                <h1 className="auth-title">Register</h1>
+                {error && <div className="auth-error">{error}</div>}
 
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '10px', marginBottom: '10px', boxSizing: 'border-box' }}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '10px', marginBottom: '10px', boxSizing: 'border-box' }}
-                />
-                <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '10px', marginBottom: '10px', boxSizing: 'border-box' }}
-                />
-                <button type="submit" style={{ width: '100%', padding: '10px' }}>Register</button>
-            </form>
-            <p>Already have an account? <a href="/login">Login</a></p>
+                <form className="auth-form" onSubmit={handleSubmit}>
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="password"
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                    />
+                    <button type="submit" className="auth-btn-submit">Register</button>
+                </form>
+
+                <div className="auth-footer">
+                    Already have an account? <a href="/login">Login</a>
+                </div>
+            </div>
         </div>
     )
 }
