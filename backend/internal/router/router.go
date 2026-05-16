@@ -20,7 +20,7 @@ func Register(repo *repository.Repository) http.Handler {
 	mux.Handle("/tasks/create", middleware.Auth(http.HandlerFunc(httpHandlers.CreateTask)))
 	mux.Handle("/tasks/", middleware.Auth(methodHandler(httpHandlers)))
 
-	return mux
+	return middleware.CORS(mux)
 }
 
 func methodHandler(handlers *handlers.Handlers) http.HandlerFunc {
